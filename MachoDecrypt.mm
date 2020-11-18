@@ -56,7 +56,7 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
         command = (struct load_command *)((unsigned char *)header + sizeof(struct mach_header_64));
     }
     else if (magic_number == MH_MAGIC) {
-        command = (struct load_command *)((unsigned char *)header + sizeof(struct mach_header_64));
+        command = (struct load_command *)((unsigned char *)header + sizeof(struct mach_header));
     }
     else {
         DLog(@"Failed: No magic number");
