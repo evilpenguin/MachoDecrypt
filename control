@@ -1,0 +1,9 @@
+Package: com.evilpenguin.machodecrypt
+Name: MachoDecrypt
+Depends: mobilesubstrate
+Version: 0.1.0
+Architecture: iphoneos-arm
+Description: Mach-O Binary Decryption
+Maintainer: EvilPenguin
+Author: EvilPenguin
+Section: Tweaks
