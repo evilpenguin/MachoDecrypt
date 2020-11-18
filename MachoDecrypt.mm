@@ -41,6 +41,8 @@ void macho_decrypt_binary(const char *binary_Name, const char *sandbox_path, com
 int _macho_start(const char *image_name, const char *binary_Name, const char *sandbox_path, int image_index, completion_block_t completion) {
     DLog(@"Decrypting image: %s", image_name);
 
+    int return_code = 0;
+
     struct mach_header *header = (struct mach_header *)_dyld_get_image_header(image_index);
     if (!header) { 
         DLog(@"Failed: No header");
@@ -85,6 +87,8 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
             if (_macho_copy_image(image_name, decrypted_path) != 0) {
                 DLog(@"Failed: to copy: %s", binary_Name);
 
+                free(decrypted_path);
+
                 completion(-1);
                 return -1;
             }
@@ -98,6 +102,8 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
             if (image_name_fd == -1) { 
                 DLog(@"Failed: to open %s", image_name);
 
+                free(decrypted_path);
+
                 completion(-1);
                 return -1;
             }
@@ -107,6 +113,9 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
             int read_bytes = read(image_name_fd, (void *)image_buffer, sizeof(image_buffer));
             if (read_bytes != sizeof(image_buffer)) { 
                 DLog(@"Failed: to read %s", image_name);
+
+                free(decrypted_path);
+                close(image_name_fd);
 
                 completion(-1);
                 return -1;
@@ -131,6 +140,9 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
                 if (file_offset == 0) {
                     DLog(@"Failed: No valid offset in FAT_CIGAM");
 
+                    free(decrypted_path);
+                    close(image_name_fd);
+
                     completion(-1);
                     return -1;
                 }
@@ -140,6 +152,9 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
             } 
             else {
                 DLog(@"Failed: no magic number");
+
+                free(decrypted_path);
+                close(image_name_fd);
 
                 completion(-1);
                 return -1;
@@ -154,6 +169,10 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
             if (read(image_name_fd, start_buffer, encrypted_offset) != encrypted_offset) {
                 DLog(@"Failed: to read %s", image_name);
 
+                free(decrypted_path);
+                free(start_buffer);
+                close(image_name_fd);
+
                 completion(-1);
                 return -1;
             }
@@ -163,6 +182,10 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
             if (decrypted_path_fd == -1) { 
                 DLog(@"Failed: to open %s", decrypted_path);
 
+                free(decrypted_path);
+                free(start_buffer);
+                close(image_name_fd);
+
                 completion(-1);
                 return -1;
             }
@@ -170,6 +193,11 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
             // Write to output
             if (write(decrypted_path_fd, start_buffer, encrypted_offset) != encrypted_offset) {
                 DLog(@"Failed: to write %s", decrypted_path);
+
+                free(decrypted_path);
+                free(start_buffer);
+                close(image_name_fd);
+                close(decrypted_path_fd);
 
                 completion(-1);
                 return -1;
@@ -183,6 +211,10 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
             if (write(decrypted_path_fd, (unsigned char *)header + encryption_command->cryptoff, encryption_command->cryptsize) != encryption_command->cryptsize) {
                 DLog(@"Failed: to write decrypted data %s", decrypted_path);
 
+                free(decrypted_path);
+                close(image_name_fd);
+                close(decrypted_path_fd);
+
                 completion(-1);
                 return -1;
             }
@@ -194,6 +226,11 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
             if (read(image_name_fd, end_buffer, file_remainder) != file_remainder) {
                 DLog(@"Failed: to read %s", image_name);
 
+                free(decrypted_path);
+                free(end_buffer);
+                close(image_name_fd);
+                close(decrypted_path_fd);
+
                 completion(-1);
                 return -1;
             }
@@ -202,6 +239,11 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
             if (write(decrypted_path_fd, end_buffer, file_remainder) != file_remainder) {
                 DLog(@"Failed: to write the last of the data data %s", decrypted_path);
 
+                free(decrypted_path);
+                free(end_buffer);
+                close(image_name_fd);
+                close(decrypted_path_fd);
+                
                 completion(-1);
                 return -1;
             }
