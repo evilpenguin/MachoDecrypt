@@ -45,9 +45,7 @@
                 }]];
                 [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
                 
-                [rootViewController dismissViewControllerAnimated:NO completion:^{
-                    [rootViewController presentViewController:alert animated:YES completion:nil];
-                }];
+                [rootViewController presentViewController:alert animated:YES completion:nil];
             });
         }];
     }
