@@ -41,8 +41,6 @@ void macho_decrypt_binary(const char *binary_Name, const char *sandbox_path, com
 int _macho_start(const char *image_name, const char *binary_Name, const char *sandbox_path, int image_index, completion_block_t completion) {
     DLog(@"Decrypting image: %s", image_name);
 
-    int return_code = 0;
-
     struct mach_header *header = (struct mach_header *)_dyld_get_image_header(image_index);
     if (!header) { 
         DLog(@"Failed: No header");
