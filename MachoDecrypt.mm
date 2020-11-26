@@ -162,7 +162,7 @@ int _macho_start(const char *image_name, const char *binary_Name, const char *sa
 
             // Find out sizes
             size_t encrypted_offset = file_offset + encryption_command->cryptoff;
-            int file_remainder = lseek(image_name_fd, 0, SEEK_END) - (encrypted_offset + encryption_command->cryptsize);    
+            int file_remainder = lseek(image_name_fd, 0, SEEK_END) - encrypted_offset - encryption_command->cryptsize;    
             lseek(image_name_fd, 0, SEEK_SET);
 
             char *start_buffer = (char *)malloc(encrypted_offset);
