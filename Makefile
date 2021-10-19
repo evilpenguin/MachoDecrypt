@@ -8,7 +8,7 @@ TARGET := iphone:10.0
 ARCHS := armv7 arm64 arm64e
 TWEAK_NAME = MachoDecrypt
 $(TWEAK_NAME)_CFLAGS += -DTHEOS_LEAN_AND_MEAN -fobjc-arc
-$(TWEAK_NAME)_FRAM += Foundation
+$(TWEAK_NAME)_FRAMEWORKS += UIKit Foundation
 $(TWEAK_NAME)_FILES = \
 	Tweak.xm \
 	MachoDecrypt.mm
